@@ -153,7 +153,7 @@ and run the query
 
 ```
 select * 
-from availability 
+  from availability 
 where 
   publisher_code = 'OPERA' 
 and 
@@ -190,7 +190,7 @@ It might seem like a really small change, but it will make a *HUGE* difference t
 
 ```
 select * 
-from availability 
+  from availability 
 where 
   publisher_code = 'OPERA' 
 and 
@@ -222,7 +222,7 @@ availability (publisher_code, hotel_code, date, availability)
 values ('OPERA', 'ABC', '2019-01-20', 5);
 
 select * 
-from availability 
+  from availability 
 where 
   publisher_code = 'OPERA' 
 and 
