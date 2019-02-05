@@ -64,13 +64,14 @@ This creates a single data center keyspace, which only maintains a single copy o
 We can then switch to this keyspace by using 
 
 ```
-use arix
+use arix;
 ```
 
 Lets start with an example. Lets say I would like to satisfy the following requirement.
 
 ```
-I would like to be able to fetch the number of available rooms for sale at a particular hotel, which belongs to a particular publisher for a specific date
+I would like to be able to fetch the number of available rooms for sale at a particular hotel, 
+which belongs to a particular publisher for a specific date
 ```
 
 Firstly lets extract out the entities / fields
@@ -107,13 +108,22 @@ We basically here have a very fast hashmap type look up.
 Lets know insert some data
 
 ```
-insert into availability (publisher_code, hotel_code, date, availability) values ('OPERA', 'ABC', '2019-01-19', 10);
+insert into 
+availability (publisher_code, hotel_code, date, availability) 
+values ('OPERA', 'ABC', '2019-01-19', 10);
 ```
 
 and do a select statement
 
 ```
-select * from availability where publisher_code = 'OPERA' and hotel_code = 'ABC' and date = ' 2019-01-19';
+select * 
+  from availability 
+where 
+  publisher_code = 'OPERA' 
+and 
+  hotel_code = 'ABC'
+and 
+  date = ' 2019-01-19';
 ```
 
 which yields the following results
@@ -126,20 +136,32 @@ which yields the following results
 
 
 
-Lets say we now have a requirements change, that we now must specify a date range instead. We must first see whether that the current table can answer the question ?
+Lets say we now have a requirements change, that we now must specify a date range instead. 
+We must first see whether that the current table can answer the question ?
 
 The answer is no. This is because at the moment the partitioner is taking the hash of the publisher_code, hotel_code and date which means that this data will be randomly distributed among multiple cassandra nodes - which will incur additional network round trip times which is not great for performance. You could argue that it is possible to brute force the dates by running individual queries for each date in the date range but this puts complexity on the clients.
 
 lets insert another record and run a range query on date, its informative to sometimes see and understand the error messages
 
 ```
-insert into availability (publisher_code, hotel_code, date, availability) values ('OPERA', 'ABC', '2019-01-20', 5);
+insert into 
+availability (publisher_code, hotel_code, date, availability) 
+values ('OPERA', 'ABC', '2019-01-20', 5);
 ```
 
 and run the query
 
 ```
-select * from availability where publisher_code = 'OPERA' and hotel_code = 'ABC' and date >= '2019-01-18' and date <= '2019-01-22';
+select * 
+from availability 
+where 
+  publisher_code = 'OPERA' 
+and 
+  hotel_code = 'ABC' 
+and 
+  date >= '2019-01-18' 
+and 
+  date <= '2019-01-22';
 ```
 
 You will get the following warning
@@ -167,7 +189,16 @@ PRIMARY KEY ((publisher_code, hotel_code), date)
 It might seem like a really small change, but it will make a *HUGE* difference to performance. What we done is to instruct the partitioner to use only the publisher_code and hotel_code as input. This means that all data having the same publisher_code and hotel_code will end up on the same node. Cassandra will cluster this data on disk by the date field in ascending order. With this inplace we can now perform range queries like
 
 ```
-select * from availability where publisher_code = 'OPERA' and hotel_code = 'ABC' and date >= '2019-01-18' and date <= '2019-01-22';
+select * 
+from availability 
+where 
+  publisher_code = 'OPERA' 
+and 
+  hotel_code = 'ABC' 
+and 
+  date >= '2019-01-18' 
+and 
+  date <= '2019-01-22';
 ```
 
 To test this out I ran the following
@@ -182,11 +213,24 @@ CREATE TABLE availability (
    availability int, 
    PRIMARY KEY ((publisher_code, hotel_code), date));
 
-insert into availability (publisher_code, hotel_code, date, availability) values ('OPERA', 'ABC', '2019-01-19', 10);
+insert into 
+availability (publisher_code, hotel_code, date, availability) 
+values ('OPERA', 'ABC', '2019-01-19', 10);
 
-insert into availability (publisher_code, hotel_code, date, availability) values ('OPERA', 'ABC', '2019-01-20', 5);
+insert into 
+availability (publisher_code, hotel_code, date, availability) 
+values ('OPERA', 'ABC', '2019-01-20', 5);
 
-select * from availability where publisher_code = 'OPERA' and hotel_code = 'ABC' and date >= '2019-01-18' and date <= '2019-01-22';
+select * 
+from availability 
+where 
+  publisher_code = 'OPERA' 
+and 
+  hotel_code = 'ABC' 
+and
+  date >= '2019-01-18' 
+and
+  date <= '2019-01-22';
 
 ```
 
