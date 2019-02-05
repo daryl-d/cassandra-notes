@@ -123,7 +123,7 @@ where
 and 
   hotel_code = 'ABC'
 and 
-  date = ' 2019-01-19';
+  date = '2019-01-19';
 ```
 
 which yields the following results
