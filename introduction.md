@@ -170,7 +170,7 @@ You will get the following warning
 InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
 ```
 
-Please do not ever use allow filtering.
+**Please do not ever use allow filtering.**
 
 
 
